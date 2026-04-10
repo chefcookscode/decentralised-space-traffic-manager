@@ -71,3 +71,33 @@ def test_unpack_restores_velocity(sample_payload):
 def test_unpack_restores_covariance(sample_payload):
     restored = ISCPPayload.unpack(sample_payload.pack())
     assert restored.covariance == pytest.approx(sample_payload.covariance)
+
+
+# ---------------------------------------------------------------------------
+# Validation errors
+# ---------------------------------------------------------------------------
+
+def test_validate_rejects_long_satellite_id():
+    payload = ISCPPayload(
+        satellite_id="TOOLONGID",  # 9 chars > 8-byte limit
+        timestamp=0.0,
+        position=(0.0, 0.0, 0.0),
+        velocity=(0.0, 0.0, 0.0),
+        covariance=[0.0] * 21,
+        mass=100.0,
+    )
+    with pytest.raises(ValueError, match="satellite_id"):
+        payload.validate()
+
+
+def test_validate_rejects_wrong_covariance_length():
+    payload = ISCPPayload(
+        satellite_id="SAT-0001",
+        timestamp=0.0,
+        position=(0.0, 0.0, 0.0),
+        velocity=(0.0, 0.0, 0.0),
+        covariance=[0.0] * 10,  # wrong length
+        mass=100.0,
+    )
+    with pytest.raises(ValueError, match="covariance"):
+        payload.validate()
