@@ -41,3 +41,18 @@ def sample_payload() -> ISCPPayload:
 
 def test_payload_size_under_1kb():
     assert PAYLOAD_SIZE <= MAX_PAYLOAD_BYTES
+
+
+# ---------------------------------------------------------------------------
+# Serialisation round-trip
+# ---------------------------------------------------------------------------
+
+def test_pack_returns_correct_length(sample_payload):
+    data = sample_payload.pack()
+    assert len(data) == PAYLOAD_SIZE
+
+
+def test_unpack_restores_satellite_id(sample_payload):
+    data = sample_payload.pack()
+    restored = ISCPPayload.unpack(data)
+    assert restored.satellite_id == sample_payload.satellite_id
