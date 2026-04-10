@@ -58,3 +58,34 @@ def test_is_high_speed_crossing_below_threshold():
     v_a = (100.0, 0.0, 0.0)
     v_b = (50.0, 0.0, 0.0)
     assert is_high_speed_crossing(v_a, v_b) is False
+
+
+# ---------------------------------------------------------------------------
+# Full handshake FSM — happy path
+# ---------------------------------------------------------------------------
+
+def test_full_handshake_reaches_established():
+    gps_now = 800_000.0
+    vel_a = (7_784.0, 0.0, 0.0)
+    vel_b = (0.0, 7_784.0, 0.0)
+
+    initiator = ISCPSession(local_id="SAT-A", peer_id="SAT-B")
+    responder = ISCPSession(local_id="SAT-B", peer_id="SAT-A")
+
+    hello = initiator.initiate(gps_now, (6_778_000.0, 0.0, 0.0), vel_a)
+    assert initiator.state == HandshakeState.INIT_SENT
+
+    hello_ack = responder.receive_hello(hello, gps_now, vel_b)
+    assert hello_ack.accepted is True
+
+    challenge = initiator.receive_hello_ack(hello_ack, gps_now)
+    assert challenge is not None
+    assert initiator.state == HandshakeState.CHALLENGE_SENT
+
+    challenge_ack = responder.receive_challenge(challenge, gps_now)
+    assert challenge_ack.accepted is True
+    assert responder.state == HandshakeState.ESTABLISHED
+
+    result = initiator.receive_challenge_ack(challenge_ack)
+    assert result is True
+    assert initiator.state == HandshakeState.ESTABLISHED
