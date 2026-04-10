@@ -89,3 +89,25 @@ def test_full_handshake_reaches_established():
     result = initiator.receive_challenge_ack(challenge_ack)
     assert result is True
     assert initiator.state == HandshakeState.ESTABLISHED
+
+
+# ---------------------------------------------------------------------------
+# Error paths
+# ---------------------------------------------------------------------------
+
+def test_handshake_rejects_version_mismatch():
+    from iscp.handshake import HelloMessage
+    responder = ISCPSession(local_id="SAT-B", peer_id="SAT-A")
+    bad_hello = HelloMessage(sender_id="SAT-A", protocol_version=99)
+    ack = responder.receive_hello(bad_hello, 800_000.0, (0.0, 0.0, 0.0))
+    assert ack.accepted is False
+    assert ack.close_reason == CloseReason.VERSION_MISMATCH
+
+
+def test_high_speed_crossing_uses_short_timeout():
+    session = ISCPSession(
+        local_id="SAT-A",
+        peer_id="SAT-B",
+        relative_speed_ms=15_000.0,  # 15 km/s
+    )
+    assert session.handshake_timeout_s < 5.0
