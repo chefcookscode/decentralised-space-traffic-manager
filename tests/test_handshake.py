@@ -37,3 +37,24 @@ def test_is_clock_in_sync_within_tolerance():
 
 def test_is_clock_in_sync_exceeds_tolerance():
     assert is_clock_in_sync(0.002) is False  # 2 ms > 1 ms threshold
+
+
+# ---------------------------------------------------------------------------
+# Relative speed
+# ---------------------------------------------------------------------------
+
+def test_relative_speed_zero_for_identical_velocities():
+    v = (7_500.0, 0.0, 0.0)
+    assert relative_speed_ms(v, v) == pytest.approx(0.0)
+
+
+def test_is_high_speed_crossing_above_threshold():
+    v_a = (7_784.0, 0.0, 0.0)
+    v_b = (-7_784.0, 0.0, 0.0)   # head-on ≈ 15.6 km/s
+    assert is_high_speed_crossing(v_a, v_b) is True
+
+
+def test_is_high_speed_crossing_below_threshold():
+    v_a = (100.0, 0.0, 0.0)
+    v_b = (50.0, 0.0, 0.0)
+    assert is_high_speed_crossing(v_a, v_b) is False
