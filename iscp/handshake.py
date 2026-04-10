@@ -30,6 +30,7 @@ state vectors.
 from __future__ import annotations
 
 import math
+import random
 import time
 from dataclasses import dataclass, field
 from enum import IntEnum
@@ -378,7 +379,6 @@ class ISCPSession:
         offset = compute_clock_offset(local_gps_s, msg.gps_epoch_s)
         self.clock_offset_s = offset
 
-        import random
         self._challenge_token = random.getrandbits(32)
         self.state = HandshakeState.CHALLENGE_SENT
         return ChallengeMessage(
