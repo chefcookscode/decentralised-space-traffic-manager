@@ -56,3 +56,18 @@ def test_unpack_restores_satellite_id(sample_payload):
     data = sample_payload.pack()
     restored = ISCPPayload.unpack(data)
     assert restored.satellite_id == sample_payload.satellite_id
+
+
+def test_unpack_restores_position(sample_payload):
+    restored = ISCPPayload.unpack(sample_payload.pack())
+    assert restored.position == pytest.approx(sample_payload.position)
+
+
+def test_unpack_restores_velocity(sample_payload):
+    restored = ISCPPayload.unpack(sample_payload.pack())
+    assert restored.velocity == pytest.approx(sample_payload.velocity)
+
+
+def test_unpack_restores_covariance(sample_payload):
+    restored = ISCPPayload.unpack(sample_payload.pack())
+    assert restored.covariance == pytest.approx(sample_payload.covariance)
