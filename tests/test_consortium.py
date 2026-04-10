@@ -29,3 +29,22 @@ def test_founding_consortium_includes_spacex(founding):
 def test_founding_consortium_includes_all_agencies(founding):
     for name in ("NASA", "ESA", "ISRO"):
         assert founding.get_member(name) is not None
+
+
+# ---------------------------------------------------------------------------
+# Review workflow
+# ---------------------------------------------------------------------------
+
+def test_open_for_review_resets_statuses(founding):
+    founding.open_for_review("0.2.0-draft")
+    for member in founding.members:
+        assert member.review_status == ReviewStatus.PENDING
+
+
+def test_attempt_ratification_succeeds_with_unanimous_approvals(founding):
+    founding.open_for_review("0.1.0-draft")
+    for member in founding.members:
+        member.submit_review(ReviewStatus.APPROVED)
+    result = founding.attempt_ratification()
+    assert result is True
+    assert founding.ratification_status == RatificationStatus.RATIFIED
