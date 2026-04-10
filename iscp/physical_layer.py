@@ -57,7 +57,7 @@ class LinkState(IntEnum):
 BROADCAST_RANGE_M: float = 500_000.0           # 500 km
 
 # ── Optical ISL ─────────────────────────────────────────────────────────────
-OPTICAL_WAVELENGTH_NM: float = 1 550.0          # nm  (telecom C-band)
+OPTICAL_WAVELENGTH_NM: float = 1_550.0          # nm  (telecom C-band)
 OPTICAL_DATA_RATE_BPS: int = 10_000_000_000     # 10 Gbps peak
 OPTICAL_DIVERGENCE_RAD: float = 10e-6           # 10 µrad beam divergence
 OPTICAL_TX_POWER_W: float = 1.0                 # 1 W transmit power
