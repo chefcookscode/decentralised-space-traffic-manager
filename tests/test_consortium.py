@@ -48,3 +48,22 @@ def test_attempt_ratification_succeeds_with_unanimous_approvals(founding):
     result = founding.attempt_ratification()
     assert result is True
     assert founding.ratification_status == RatificationStatus.RATIFIED
+
+
+def test_attempt_ratification_fails_below_threshold(founding):
+    founding.open_for_review("0.1.0-draft")
+    # Only one approval out of eight → 12.5 % < 75 % threshold
+    founding.members[0].submit_review(ReviewStatus.APPROVED)
+    result = founding.attempt_ratification()
+    assert result is False
+
+
+def test_add_duplicate_member_raises(founding):
+    with pytest.raises(ValueError, match="already registered"):
+        founding.add_member(
+            ConsortiumMember("SpaceX", MemberCategory.LEO_OPERATOR, "US", "x@x.com")
+        )
+
+
+def test_member_summary_returns_string(founding):
+    assert isinstance(founding.member_summary(), str)
