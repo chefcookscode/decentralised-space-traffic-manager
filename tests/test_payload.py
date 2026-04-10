@@ -101,3 +101,26 @@ def test_validate_rejects_wrong_covariance_length():
     )
     with pytest.raises(ValueError, match="covariance"):
         payload.validate()
+
+
+def test_validate_rejects_negative_mass():
+    payload = ISCPPayload(
+        satellite_id="SAT-0001",
+        timestamp=0.0,
+        position=(0.0, 0.0, 0.0),
+        velocity=(0.0, 0.0, 0.0),
+        covariance=[0.0] * 21,
+        mass=-1.0,
+    )
+    with pytest.raises(ValueError, match="mass"):
+        payload.validate()
+
+
+def test_validate_rejects_invalid_confidence():
+    intent = ManeuverIntent(confidence=1.5)
+    with pytest.raises(ValueError, match="confidence"):
+        intent.validate()
+
+
+def test_summary_returns_string(sample_payload):
+    assert isinstance(sample_payload.summary(), str)
