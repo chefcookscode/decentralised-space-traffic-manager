@@ -234,8 +234,8 @@ class PositionSanityChecker:
                 satellite_id, timestamp, velocity, result
             )
 
-        # 4. Update history only if at least a WARNING or better
-        if result.threat_level != ThreatLevel.COMPROMISED:
+        # 4. Update history only if no serious threat (not COMPROMISED or REPLAY)
+        if result.threat_level not in (ThreatLevel.COMPROMISED, ThreatLevel.REPLAY):
             self._last_state[satellite_id] = (timestamp, position, velocity)
 
         return result

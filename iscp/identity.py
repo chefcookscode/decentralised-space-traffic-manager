@@ -54,7 +54,13 @@ DEFAULT_CERT_VALIDITY_S: float = 5 * 365.25 * 86_400.0
 # ---------------------------------------------------------------------------
 
 def _unix_to_gps(unix_ts: float) -> float:
-    """Convert a Unix timestamp to GPS seconds since J2000 (approx)."""
+    """Convert a Unix timestamp to GPS seconds since J2000 (approx).
+
+    Note: This is a simplified conversion that does not account for leap
+    seconds or the difference between GPS time and TT (Terrestrial Time).
+    Accurate to within ~20 seconds for practical purposes; precise timing
+    is handled by the GNSS synchronisation layer in iscp.handshake.
+    """
     # J2000 epoch = 2000-01-01T12:00:00 TT ≈ Unix 946_728_000
     return unix_ts - 946_728_000.0
 
@@ -181,11 +187,11 @@ class CertificateAuthority:
     """
     ca_id: str
     organisation: str
-    _private_key: ec.EllipticCurvePrivateKey = field(
-        default=None, init=False, repr=False  # type: ignore[assignment]
+    _private_key: Optional[ec.EllipticCurvePrivateKey] = field(
+        default=None, init=False, repr=False
     )
-    _public_key: ec.EllipticCurvePublicKey = field(
-        default=None, init=False, repr=False  # type: ignore[assignment]
+    _public_key: Optional[ec.EllipticCurvePublicKey] = field(
+        default=None, init=False, repr=False
     )
 
     def __post_init__(self) -> None:
@@ -195,11 +201,13 @@ class CertificateAuthority:
     @property
     def public_key(self) -> ec.EllipticCurvePublicKey:
         """Return the CA's ECC public key."""
+        assert self._public_key is not None
         return self._public_key
 
     @property
     def public_key_pem(self) -> bytes:
         """Return the PEM-encoded CA public key."""
+        assert self._public_key is not None
         return self._public_key.public_bytes(
             serialization.Encoding.PEM,
             serialization.PublicFormat.SubjectPublicKeyInfo,
@@ -255,6 +263,7 @@ class CertificateAuthority:
         cert.serial = cert.compute_serial()
 
         # Sign the canonical bytes with the CA private key
+        assert self._private_key is not None
         signature = self._private_key.sign(
             cert.canonical_bytes(),
             ec.ECDSA(hashes.SHA256()),
@@ -271,6 +280,7 @@ class CertificateAuthority:
         """
         if cert.issuer_ca_id != self.ca_id:
             return False
+        assert self._public_key is not None
         try:
             self._public_key.verify(
                 cert.ca_signature,
