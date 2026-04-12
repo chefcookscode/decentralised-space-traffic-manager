@@ -12,7 +12,7 @@
 
 ---
 
-> **Open-Source**
+> **Note for Open-Source Contributors: If you’re looking for assistance or have questions, don’t hesitate to join the conversation in our discussion forum. We’re happy to help!**
 
 ---
 
