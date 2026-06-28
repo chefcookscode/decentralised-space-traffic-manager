@@ -68,3 +68,9 @@ from iscp.audit import (
     AuditRecord,
     GENESIS_HASH,
 )
+
+from iscp.collision_probability import (
+    SatelliteState,
+    CollisionProbabilityResult,
+    calculate_probability_of_collision,
+)
